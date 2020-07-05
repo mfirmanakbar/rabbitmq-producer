@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * 1. FOR SIMPLE QUEUE
+ * 1. Simple Queue
  * */
 //@Service
 public class HelloRabbitProducer {

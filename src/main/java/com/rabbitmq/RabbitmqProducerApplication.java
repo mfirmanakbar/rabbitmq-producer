@@ -1,8 +1,10 @@
 package com.rabbitmq;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.rabbitmq.entity.Employee;
 import com.rabbitmq.entity.Picture;
 import com.rabbitmq.producer.*;
+import com.rabbitmq.producer.handling.dlx.MyPictureProducer;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -40,6 +42,11 @@ public class RabbitmqProducerApplication implements CommandLineRunner {
 //    private final List<String> SOURCES_TOPIC = List.of("mobile", "web");
 //    private final List<String> TYPES_TOPIC = List.of("jpg", "png", "svg");
 
+    @Autowired
+    private MyPictureProducer myPictureProducer;
+    private final List<String> SOURCES_DLX = List.of("mobile", "web");
+    private final List<String> TYPES_DLX = List.of("jpg", "png", "svg");
+
     public static void main(String[] args) {
         SpringApplication.run(RabbitmqProducerApplication.class, args);
     }
@@ -51,10 +58,27 @@ public class RabbitmqProducerApplication implements CommandLineRunner {
         //FanoutExchangeSample();
         //DirectExchangeSample();
         //TopicExchangeSample();
+        errorHandlingDlxSample();
     }
 
     /**
-     * 6. For Topic Exchange (send the same data queue for 2 or more consumer with Validated on RabbitMQ)
+     * 7. This sample of how to handling error with DLX (Dead Letter Exchange)
+     * */
+    private void errorHandlingDlxSample() throws Exception {
+        for (int i = 0; i < 1; i++) {
+            Picture p = new Picture();
+
+            p.setName("Picture " + i);
+            p.setSize(ThreadLocalRandom.current().nextLong(9001, 10001));
+            p.setSource(SOURCES_DLX.get(i % SOURCES_DLX.size()));
+            p.setType(TYPES_DLX.get(i % TYPES_DLX.size()));
+
+            myPictureProducer.sendMessage(p);
+        }
+    }
+
+    /**
+     * 6. Exchange Topic Type (send the same data queue for 2 or more consumer with Validated on RabbitMQ)
      * - is like Direct Exchange
      * - the different is on Topic Exchange we can able to use pattern of wildcard on the RoutingKey of RabbitMQ
      * - the pattern like `mobile.#` or `#.jpg` or `*.*.png` or `*.large.svg` or `*.*.svg`
@@ -72,7 +96,7 @@ public class RabbitmqProducerApplication implements CommandLineRunner {
     }
 
     /**
-     * 5. FOR DIRECT EXCHANGE (send the same data queue for 2 or more consumer with Validated on RabbitMQ)
+     * 5. Exchange Direct Type (send the same data queue for 2 or more consumer with Validated on RabbitMQ)
      * - Let's say there are 2 consumers --> `ImageConsumer` and `VectorConsumer`
      * - I put validation on RabbitMQ :
      * # if the data are `JPG` and `PGN` type then it will consumed for `ImageConsumer`
@@ -94,7 +118,7 @@ public class RabbitmqProducerApplication implements CommandLineRunner {
     }
 
     /**
-     * 4. FOR FANOUT EXCHANGE (send the same data queue for 2 or more consumer)
+     * 4. Exchange FanOut Type (send the same data queue for 2 or more consumer)
      * - Let's say there are 2 consumers --> `Accounting` and `Marketing`
      * - I have 10 employee data, then I send 10 data for Accounting and also Marketing
      */
@@ -106,7 +130,7 @@ public class RabbitmqProducerApplication implements CommandLineRunner {
     }
 
     /**
-     * 3. FOR consume JSON format
+     * 3. Consuming JSON Format
      */
     private void consumingJson() {
 //        for (int i = 0; i < 5; i++) {
@@ -116,7 +140,7 @@ public class RabbitmqProducerApplication implements CommandLineRunner {
     }
 
     /**
-     * 1. FOR SIMPLE QUEUE
+     * 1. Simple Queue
      */
     private void simpleQueue() {
 //        helloRabbitProducer.sendHello("Firman " + Math.random());

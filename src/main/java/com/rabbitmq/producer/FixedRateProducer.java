@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 /**
- * 2. FOR FIX RATED like produce the data using Scheduled
+ * 2. Scheduled Sample
  * */
 //@Service
 public class FixedRateProducer {

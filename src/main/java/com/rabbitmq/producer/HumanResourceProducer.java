@@ -8,7 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
-// 4. FOR FANOUT EXCHANGE (Send 1 the same queue for 2 or more consumer using rabbitMq Fanout Exchange)
+/**
+ * 4. FOR FANOUT EXCHANGE (send the same data queue for 2 or more consumer)
+ * - Let's say there are 2 consumers --> `Accounting` and `Marketing`
+ * - I have 10 employee data, then I send 10 data for Accounting and also Marketing
+ * */
 //@Service
 public class HumanResourceProducer {
 

@@ -7,7 +7,9 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-// 3. FOR Sending JSON sample
+/**
+ * 3. FOR consume JSON format
+ * */
 //@Service
 public class EmployeeJsonProducer {
 

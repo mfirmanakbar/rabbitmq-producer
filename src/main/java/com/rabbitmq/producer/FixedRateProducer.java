@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-// 2. FOR FIX RATED (produce the data every half second)
+/**
+ * 2. FOR FIX RATED like produce the data using Scheduled
+ * */
 //@Service
 public class FixedRateProducer {
 

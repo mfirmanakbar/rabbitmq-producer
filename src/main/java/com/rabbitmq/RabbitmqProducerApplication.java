@@ -62,7 +62,7 @@ public class RabbitmqProducerApplication implements CommandLineRunner {
     }
 
     /**
-     * 7. This sample of how to handling error with DLX (Dead Letter Exchange)
+     * 7. Error Handling with DLX (Dead Letter Exchange)
      * */
     private void errorHandlingDlxSample() throws Exception {
         for (int i = 0; i < 1; i++) {

@@ -51,16 +51,18 @@
 
 7. Error Handling with DLX
     - Go to Exchanges 
-    - Add FanOut Exchange (or other) with name `x.mypicture`    
+        - Add FanOut Exchange (or other) with name `x.mypicture`    
     - Go to Exchanges 
         - Add FanOut Exchange (or other) with name `x.mypicture.dlx`
-        - Go to Queues 
+    - Go to Queues 
         - Add Queue:
-            - name `q.mypicture.dlx` and click it
-            - Then Bindings with `x.mypicture.dlx`
+            - name `q.mypicture.dlx` 
+            - then click it
+            - then Bindings with exchange `x.mypicture.dlx`
         - Add Queue:
             - name `q.mypicture.image`
             - Add the argument with:
                 - `x-dead-letter-exchange` = `x.mypicture.dlx` String
                 - or just click **Dead letter exchange** then equals `x.mypicture.dlx`
-            - Click `q.mypicture.image` on Queues then Bindings with name `x.mypicture`
+        - Click `q.mypicture.image` on Queues then Bindings with name `x.mypicture`
+    - the result will broadcast to `q.mypicture.dlx`

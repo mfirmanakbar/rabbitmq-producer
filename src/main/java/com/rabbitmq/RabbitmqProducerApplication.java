@@ -42,10 +42,10 @@ public class RabbitmqProducerApplication implements CommandLineRunner {
 //    private final List<String> SOURCES_TOPIC = List.of("mobile", "web");
 //    private final List<String> TYPES_TOPIC = List.of("jpg", "png", "svg");
 
-    @Autowired
-    private MyPictureProducer myPictureProducer;
-    private final List<String> SOURCES_DLX = List.of("mobile", "web");
-    private final List<String> TYPES_DLX = List.of("jpg", "png", "svg");
+//    @Autowired
+//    private MyPictureProducer myPictureProducer;
+//    private final List<String> SOURCES_DLX = List.of("mobile", "web");
+//    private final List<String> TYPES_DLX = List.of("jpg", "png", "svg");
 
     public static void main(String[] args) {
         SpringApplication.run(RabbitmqProducerApplication.class, args);
@@ -53,28 +53,38 @@ public class RabbitmqProducerApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        //simpleQueue();
-        //consumingJson();
-        //FanoutExchangeSample();
-        //DirectExchangeSample();
-        //TopicExchangeSample();
+        simpleQueue();
+        consumingJson();
+        FanoutExchangeSample();
+        DirectExchangeSample();
+        TopicExchangeSample();
         errorHandlingDlxSample();
+        errorHandlingTtlSample();
+    }
+
+    /**
+     * 8. Error Handling with DLX (Dead Letter Exchange)
+     * */
+    private void errorHandlingTtlSample() {
+
     }
 
     /**
      * 7. Error Handling with DLX (Dead Letter Exchange)
+     * if we have some error from consumer validation
+     * we can reject the queue and move it to another queue
      * */
     private void errorHandlingDlxSample() throws Exception {
-        for (int i = 0; i < 1; i++) {
-            Picture p = new Picture();
-
-            p.setName("Picture " + i);
-            p.setSize(ThreadLocalRandom.current().nextLong(9001, 10001));
-            p.setSource(SOURCES_DLX.get(i % SOURCES_DLX.size()));
-            p.setType(TYPES_DLX.get(i % TYPES_DLX.size()));
-
-            myPictureProducer.sendMessage(p);
-        }
+//        for (int i = 0; i < 1; i++) {
+//            Picture p = new Picture();
+//
+//            p.setName("Picture " + i);
+//            p.setSize(ThreadLocalRandom.current().nextLong(9001, 10001));
+//            p.setSource(SOURCES_DLX.get(i % SOURCES_DLX.size()));
+//            p.setType(TYPES_DLX.get(i % TYPES_DLX.size()));
+//
+//            myPictureProducer.sendMessage(p);
+//        }
     }
 
     /**

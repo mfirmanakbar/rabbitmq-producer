@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.rabbitmq.entity.Employee;
 import com.rabbitmq.entity.Picture;
 import com.rabbitmq.producer.*;
+import com.rabbitmq.producer.exchange.direct.PictureProducer;
 import com.rabbitmq.producer.handling.dlx.MyPictureProducer;
+import com.rabbitmq.producer.handling.ttl.MyPictureProducerTTL;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -47,6 +49,11 @@ public class RabbitmqProducerApplication implements CommandLineRunner {
 //    private final List<String> SOURCES_DLX = List.of("mobile", "web");
 //    private final List<String> TYPES_DLX = List.of("jpg", "png", "svg");
 
+    @Autowired
+    private MyPictureProducerTTL myPictureProducerTTL;
+    private final List<String> SOURCES_TTL = List.of("mobile", "web");
+    private final List<String> TYPES_TTL = List.of("jpg", "png", "svg");
+
     public static void main(String[] args) {
         SpringApplication.run(RabbitmqProducerApplication.class, args);
     }
@@ -60,13 +67,30 @@ public class RabbitmqProducerApplication implements CommandLineRunner {
         TopicExchangeSample();
         errorHandlingDlxSample();
         errorHandlingTtlSample();
+
+        ngetesBro();
+    }
+
+    private void ngetesBro() {
+        //System.out.println("IS WORKER ? " + System.getenv("AUTO_DAILY_SYNC"));
+        //NgetesBroProducer test = new NgetesBroProducer();
+        //test.publish();
     }
 
     /**
      * 8. Error Handling with DLX (Dead Letter Exchange)
      * */
-    private void errorHandlingTtlSample() {
+    private void errorHandlingTtlSample() throws Exception {
+        for (int i = 0; i < 1; i++) {
+            Picture p = new Picture();
 
+            p.setName("Picture " + i);
+            p.setSize(ThreadLocalRandom.current().nextLong(9001, 10001));
+            p.setSource(SOURCES_TTL.get(i % SOURCES_TTL.size()));
+            p.setType(TYPES_TTL.get(i % TYPES_TTL.size()));
+
+            myPictureProducerTTL.sendMessage(p);
+        }
     }
 
     /**

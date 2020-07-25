@@ -1,3 +1,6 @@
+moka:
+  is-server-worker: true
+
 spring:
   rabbitmq:
     host: 127.0.0.1

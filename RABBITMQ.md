@@ -66,3 +66,19 @@
                 - or just click **Dead letter exchange** then equals `x.mypicture.dlx`
         - Click `q.mypicture.image` on Queues then Bindings with name `x.mypicture`
     - the result will broadcast to `q.mypicture.dlx`
+
+8. Error Handling with TTL
+    - Go to Exchanges 
+        - Add FanOut Exchange (or other) with name `x.mypicturettl`
+        - Add FanOut Exchange (or other) with name `x.mypicturettl.dlx`
+    - Go to Queues
+        - Add Queue name `q.mypicturettl.image`
+        - Add Queue name `q.mypicturettl.image-ttl`
+            - Add the argument with `x-message-ttl` = 5000
+            - Add the argument with `x-dead-letter-exchange` = `x.mypicturettl.dlx` String
+        - Add Queue name `q.mypicturettl.dlx`
+    - Go to Exchanges
+        - Bind `x.mypicturettl` into queue `q.mypicturettl.image`
+        - Bind `x.mypicturettl` into queue `q.mypicturettl.image-ttl`
+        - Bind `x.mypicturettl.dlx` into queue `q.mypicturettl.dlx`
+        

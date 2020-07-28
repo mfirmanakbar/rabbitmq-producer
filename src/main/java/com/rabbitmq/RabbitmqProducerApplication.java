@@ -7,6 +7,7 @@ import com.rabbitmq.producer.*;
 import com.rabbitmq.producer.exchange.direct.PictureProducer;
 import com.rabbitmq.producer.handling.dlx.MyPictureProducer;
 import com.rabbitmq.producer.handling.ttl.MyPictureProducerTTL;
+import com.rabbitmq.producer.retry.RetryPictureProducer;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -22,7 +23,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * @EnableScheduling ==> if this active FOR FIXRATED Scheduled
  */
 @SpringBootApplication
-//@EnableScheduling
+@EnableScheduling
 public class RabbitmqProducerApplication implements CommandLineRunner {
 
 //    @Autowired
@@ -49,10 +50,21 @@ public class RabbitmqProducerApplication implements CommandLineRunner {
 //    private final List<String> SOURCES_DLX = List.of("mobile", "web");
 //    private final List<String> TYPES_DLX = List.of("jpg", "png", "svg");
 
+//    @Autowired
+//    private MyPictureProducerTTL myPictureProducerTTL;
+//    private final List<String> SOURCES_TTL = List.of("mobile", "web");
+//    private final List<String> TYPES_TTL = List.of("jpg", "png", "svg");
+
+//    @Autowired
+//    private RetryPictureProducer retryPictureProducer;
+//    private final List<String> SOURCES_TRY = List.of("mobile", "web");
+//    private final List<String> TYPES_TRY = List.of("jpg", "png", "svg");
+
+//    @Autowired
+//    StopStartProducer stopStartProducer;
+
     @Autowired
-    private MyPictureProducerTTL myPictureProducerTTL;
-    private final List<String> SOURCES_TTL = List.of("mobile", "web");
-    private final List<String> TYPES_TTL = List.of("jpg", "png", "svg");
+    AckNackProducer ackNackProducer;
 
     public static void main(String[] args) {
         SpringApplication.run(RabbitmqProducerApplication.class, args);
@@ -67,8 +79,39 @@ public class RabbitmqProducerApplication implements CommandLineRunner {
         TopicExchangeSample();
         errorHandlingDlxSample();
         errorHandlingTtlSample();
-
+        retryMechanismDirect();
+        stopStartRabbit();
         ngetesBro();
+        ackNackRabbit();
+    }
+
+    private void ackNackRabbit() {
+        for (int i = 0; i < 8; i++) {
+            if (i % 2 == 0) {
+                ackNackProducer.publish("Sync Outlet " + i, "b");
+            } else {
+                ackNackProducer.publish("Sync Outlet " + i, "a");
+            }
+        }
+    }
+
+    private void stopStartRabbit() {
+//        for (int i = 0; i < 10; i++) {
+//            stopStartProducer.publish("number-" + i);
+//        }
+    }
+
+    private void retryMechanismDirect() throws Exception {
+//        for (int i = 0; i < 1; i++) {
+//            Picture p = new Picture();
+//
+//            p.setName("Picture " + i);
+//            p.setSize(ThreadLocalRandom.current().nextLong(9001, 10001));
+//            p.setSource(SOURCES_TRY.get(i % SOURCES_TRY.size()));
+//            p.setType(TYPES_TRY.get(i % TYPES_TRY.size()));
+//
+//            retryPictureProducer.sendMessage(p);
+//        }
     }
 
     private void ngetesBro() {
@@ -78,26 +121,26 @@ public class RabbitmqProducerApplication implements CommandLineRunner {
     }
 
     /**
-     * 8. Error Handling with DLX (Dead Letter Exchange)
-     * */
+     * 8. Error Handling with TTL (Time to Live)
+     */
     private void errorHandlingTtlSample() throws Exception {
-        for (int i = 0; i < 1; i++) {
-            Picture p = new Picture();
-
-            p.setName("Picture " + i);
-            p.setSize(ThreadLocalRandom.current().nextLong(9001, 10001));
-            p.setSource(SOURCES_TTL.get(i % SOURCES_TTL.size()));
-            p.setType(TYPES_TTL.get(i % TYPES_TTL.size()));
-
-            myPictureProducerTTL.sendMessage(p);
-        }
+//        for (int i = 0; i < 1; i++) {
+//            Picture p = new Picture();
+//
+//            p.setName("Picture " + i);
+//            p.setSize(ThreadLocalRandom.current().nextLong(9001, 10001));
+//            p.setSource(SOURCES_TTL.get(i % SOURCES_TTL.size()));
+//            p.setType(TYPES_TTL.get(i % TYPES_TTL.size()));
+//
+//            myPictureProducerTTL.sendMessage(p);
+//        }
     }
 
     /**
      * 7. Error Handling with DLX (Dead Letter Exchange)
      * if we have some error from consumer validation
      * we can reject the queue and move it to another queue
-     * */
+     */
     private void errorHandlingDlxSample() throws Exception {
 //        for (int i = 0; i < 1; i++) {
 //            Picture p = new Picture();

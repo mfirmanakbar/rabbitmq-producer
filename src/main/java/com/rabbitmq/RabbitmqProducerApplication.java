@@ -1,29 +1,24 @@
 package com.rabbitmq;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.rabbitmq.entity.Employee;
-import com.rabbitmq.entity.Picture;
-import com.rabbitmq.producer.*;
-import com.rabbitmq.producer.exchange.direct.PictureProducer;
-import com.rabbitmq.producer.handling.dlx.MyPictureProducer;
-import com.rabbitmq.producer.handling.ttl.MyPictureProducerTTL;
-import com.rabbitmq.producer.retry.RetryPictureProducer;
-import org.springframework.amqp.core.FanoutExchange;
+import com.rabbitmq.entity.InvoiceCancelledMessage;
+import com.rabbitmq.entity.InvoiceCreatedMessage;
+import com.rabbitmq.entity.InvoicePaidMessage;
+import com.rabbitmq.entity.InvoiceRejectedMessage;
+import com.rabbitmq.producer.invoice.InvoiceProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.cglib.core.Local;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @EnableScheduling ==> if this active FOR FIXRATED Scheduled
  */
 @SpringBootApplication
-@EnableScheduling
+//@EnableScheduling
 public class RabbitmqProducerApplication implements CommandLineRunner {
 
 //    @Autowired
@@ -63,8 +58,11 @@ public class RabbitmqProducerApplication implements CommandLineRunner {
 //    @Autowired
 //    StopStartProducer stopStartProducer;
 
+//    @Autowired
+//    AckNackProducer ackNackProducer;
+
     @Autowired
-    AckNackProducer ackNackProducer;
+    private InvoiceProducer invoiceProducer;
 
     public static void main(String[] args) {
         SpringApplication.run(RabbitmqProducerApplication.class, args);
@@ -72,27 +70,59 @@ public class RabbitmqProducerApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        simpleQueue();
-        consumingJson();
-        FanoutExchangeSample();
-        DirectExchangeSample();
-        TopicExchangeSample();
-        errorHandlingDlxSample();
-        errorHandlingTtlSample();
-        retryMechanismDirect();
-        stopStartRabbit();
-        ngetesBro();
-        ackNackRabbit();
+//        simpleQueue();
+//        consumingJson();
+//        FanoutExchangeSample();
+//        DirectExchangeSample();
+//        TopicExchangeSample();
+//        errorHandlingDlxSample();
+//        errorHandlingTtlSample();
+//        retryMechanismDirect();
+//        stopStartRabbit();
+//        ngetesBro();
+//        ackNackRabbit();
+        invoices();
+    }
+
+    private void invoices() {
+        String randomInvoiceNumber = "INV-" + ThreadLocalRandom.current().nextInt(100, 200);
+        InvoiceCreatedMessage invoiceCreatedMessage = new InvoiceCreatedMessage();
+        invoiceCreatedMessage.setAmount(154.25);
+        invoiceCreatedMessage.setCreatedDate(LocalDate.now());
+        invoiceCreatedMessage.setCurrency("Rp");
+        invoiceProducer.sendInvoiceCreated(invoiceCreatedMessage);
+
+        randomInvoiceNumber = "INV-" + ThreadLocalRandom.current().nextInt(200, 300);
+        String randomPaymentNumber = "PAY-" + ThreadLocalRandom.current().nextInt(20000, 30000);
+        InvoicePaidMessage invoicePaidMessage = new InvoicePaidMessage();
+        invoicePaidMessage.setInvoiceNumber(randomInvoiceNumber);
+        invoicePaidMessage.setPaidDate(LocalDate.now());
+        invoicePaidMessage.setPaymentNumber(randomPaymentNumber);
+        invoiceProducer.sendInvoicePaid(invoicePaidMessage);
+
+        randomInvoiceNumber = "INV-" + ThreadLocalRandom.current().nextInt(300, 400);
+        InvoiceCancelledMessage invoiceCancelledMessage = new InvoiceCancelledMessage();
+        invoiceCancelledMessage.setCancelDate(LocalDate.now());
+        invoiceCancelledMessage.setInvoiceNumber(randomInvoiceNumber);
+        invoiceCancelledMessage.setReason("Just cancel it!");
+        invoiceProducer.sendInvoiceCancelled(invoiceCancelledMessage);
+
+        randomInvoiceNumber = "INV-" + ThreadLocalRandom.current().nextInt(400, 500);
+        InvoiceRejectedMessage invoiceRejectedMessage = new InvoiceRejectedMessage();
+        invoiceRejectedMessage.setCancelDate(LocalDate.now());
+        invoiceRejectedMessage.setInvoiceNumber(randomInvoiceNumber);
+        invoiceRejectedMessage.setReason("I want to reject this one");
+        invoiceProducer.sendInvoiceRejected(invoiceRejectedMessage);
     }
 
     private void ackNackRabbit() {
-        for (int i = 0; i < 8; i++) {
-            if (i % 2 == 0) {
-                ackNackProducer.publish("Sync Outlet " + i, "b");
-            } else {
-                ackNackProducer.publish("Sync Outlet " + i, "a");
-            }
-        }
+//        for (int i = 0; i < 8; i++) {
+//            if (i % 2 == 0) {
+//                ackNackProducer.publish("Sync Outlet " + i, "b");
+//            } else {
+//                ackNackProducer.publish("Sync Outlet " + i, "a");
+//            }
+//        }
     }
 
     private void stopStartRabbit() {

@@ -5,6 +5,7 @@ import com.rabbitmq.entity.InvoiceCreatedMessage;
 import com.rabbitmq.entity.InvoicePaidMessage;
 import com.rabbitmq.entity.InvoiceRejectedMessage;
 import com.rabbitmq.producer.invoice.InvoiceProducer;
+import com.rabbitmq.producer.invoice.InvoiceProducerCh;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -19,7 +20,7 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 @SpringBootApplication
 //@EnableScheduling
-public class RabbitmqProducerApplication implements CommandLineRunner {
+public abstract class RabbitmqProducerApplication implements CommandLineRunner {
 
 //    @Autowired
 //    private HelloRabbitProducer helloRabbitProducer;
@@ -61,8 +62,11 @@ public class RabbitmqProducerApplication implements CommandLineRunner {
 //    @Autowired
 //    AckNackProducer ackNackProducer;
 
+//    @Autowired
+//    private InvoiceProducer invoiceProducer;
+
     @Autowired
-    private InvoiceProducer invoiceProducer;
+    private InvoiceProducerCh invoiceProducerCh;
 
     public static void main(String[] args) {
         SpringApplication.run(RabbitmqProducerApplication.class, args);
@@ -81,38 +85,55 @@ public class RabbitmqProducerApplication implements CommandLineRunner {
 //        stopStartRabbit();
 //        ngetesBro();
 //        ackNackRabbit();
-        invoices();
+//        invoices();
+        invoicesRabbitConsistentHash();
     }
 
+    private void invoicesRabbitConsistentHash() {
+        for (int i = 0; i < 25; i++) {
+            String invoiceNumber = "invoice-" + (i % 6);
+            InvoiceCreatedMessage invoice = new InvoiceCreatedMessage();
+            invoice.setAmount(ThreadLocalRandom.current().nextInt(100));
+            invoice.setCreatedDate(LocalDate.now());
+            invoice.setCurrency("USD");
+            invoice.setInvoiceNumber(invoiceNumber);
+            invoiceProducerCh.sendInvoiceCreated(invoice);
+        }
+    }
+
+
+    /**
+     * one queue + multiple messages
+     */
     private void invoices() {
-        String randomInvoiceNumber = "INV-" + ThreadLocalRandom.current().nextInt(100, 200);
-        InvoiceCreatedMessage invoiceCreatedMessage = new InvoiceCreatedMessage();
-        invoiceCreatedMessage.setAmount(154.25);
-        invoiceCreatedMessage.setCreatedDate(LocalDate.now());
-        invoiceCreatedMessage.setCurrency("Rp");
-        invoiceProducer.sendInvoiceCreated(invoiceCreatedMessage);
-
-        randomInvoiceNumber = "INV-" + ThreadLocalRandom.current().nextInt(200, 300);
-        String randomPaymentNumber = "PAY-" + ThreadLocalRandom.current().nextInt(20000, 30000);
-        InvoicePaidMessage invoicePaidMessage = new InvoicePaidMessage();
-        invoicePaidMessage.setInvoiceNumber(randomInvoiceNumber);
-        invoicePaidMessage.setPaidDate(LocalDate.now());
-        invoicePaidMessage.setPaymentNumber(randomPaymentNumber);
-        invoiceProducer.sendInvoicePaid(invoicePaidMessage);
-
-        randomInvoiceNumber = "INV-" + ThreadLocalRandom.current().nextInt(300, 400);
-        InvoiceCancelledMessage invoiceCancelledMessage = new InvoiceCancelledMessage();
-        invoiceCancelledMessage.setCancelDate(LocalDate.now());
-        invoiceCancelledMessage.setInvoiceNumber(randomInvoiceNumber);
-        invoiceCancelledMessage.setReason("Just cancel it!");
-        invoiceProducer.sendInvoiceCancelled(invoiceCancelledMessage);
-
-        randomInvoiceNumber = "INV-" + ThreadLocalRandom.current().nextInt(400, 500);
-        InvoiceRejectedMessage invoiceRejectedMessage = new InvoiceRejectedMessage();
-        invoiceRejectedMessage.setCancelDate(LocalDate.now());
-        invoiceRejectedMessage.setInvoiceNumber(randomInvoiceNumber);
-        invoiceRejectedMessage.setReason("I want to reject this one");
-        invoiceProducer.sendInvoiceRejected(invoiceRejectedMessage);
+//        String randomInvoiceNumber = "INV-" + ThreadLocalRandom.current().nextInt(100, 200);
+//        InvoiceCreatedMessage invoiceCreatedMessage = new InvoiceCreatedMessage();
+//        invoiceCreatedMessage.setAmount(154.25);
+//        invoiceCreatedMessage.setCreatedDate(LocalDate.now());
+//        invoiceCreatedMessage.setCurrency("Rp");
+//        invoiceProducer.sendInvoiceCreated(invoiceCreatedMessage);
+//
+//        randomInvoiceNumber = "INV-" + ThreadLocalRandom.current().nextInt(200, 300);
+//        String randomPaymentNumber = "PAY-" + ThreadLocalRandom.current().nextInt(20000, 30000);
+//        InvoicePaidMessage invoicePaidMessage = new InvoicePaidMessage();
+//        invoicePaidMessage.setInvoiceNumber(randomInvoiceNumber);
+//        invoicePaidMessage.setPaidDate(LocalDate.now());
+//        invoicePaidMessage.setPaymentNumber(randomPaymentNumber);
+//        invoiceProducer.sendInvoicePaid(invoicePaidMessage);
+//
+//        randomInvoiceNumber = "INV-" + ThreadLocalRandom.current().nextInt(300, 400);
+//        InvoiceCancelledMessage invoiceCancelledMessage = new InvoiceCancelledMessage();
+//        invoiceCancelledMessage.setCancelDate(LocalDate.now());
+//        invoiceCancelledMessage.setInvoiceNumber(randomInvoiceNumber);
+//        invoiceCancelledMessage.setReason("Just cancel it!");
+//        invoiceProducer.sendInvoiceCancelled(invoiceCancelledMessage);
+//
+//        randomInvoiceNumber = "INV-" + ThreadLocalRandom.current().nextInt(400, 500);
+//        InvoiceRejectedMessage invoiceRejectedMessage = new InvoiceRejectedMessage();
+//        invoiceRejectedMessage.setCancelDate(LocalDate.now());
+//        invoiceRejectedMessage.setInvoiceNumber(randomInvoiceNumber);
+//        invoiceRejectedMessage.setReason("I want to reject this one");
+//        invoiceProducer.sendInvoiceRejected(invoiceRejectedMessage);
     }
 
     private void ackNackRabbit() {

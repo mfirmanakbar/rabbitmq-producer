@@ -8,16 +8,16 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-//@Service
-public class InvoiceProducer {
+@Service
+public class InvoiceProducerCh {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    private static final String EXCHANGE = "x.invoice";
+    private static final String EXCHANGE = "x.ch-invoice";
 
     public void sendInvoiceCreated(InvoiceCreatedMessage message) {
-        rabbitTemplate.convertAndSend(EXCHANGE, "", message);
+        rabbitTemplate.convertAndSend(EXCHANGE, message.getInvoiceNumber(), message);
     }
 
     public void sendInvoicePaid(InvoicePaidMessage message) {

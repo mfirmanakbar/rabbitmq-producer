@@ -86,19 +86,44 @@ public abstract class RabbitmqProducerApplication implements CommandLineRunner {
 //        ngetesBro();
 //        ackNackRabbit();
 //        invoices();
-        invoicesRabbitConsistentHash();
+//        invoicesRabbitConsistentHashA();
+        invoicesRabbitConsistentHashB();
     }
 
-    private void invoicesRabbitConsistentHash() {
-        for (int i = 0; i < 25; i++) {
-            String invoiceNumber = "invoice-" + (i % 6);
-            InvoiceCreatedMessage invoice = new InvoiceCreatedMessage();
-            invoice.setAmount(ThreadLocalRandom.current().nextInt(100));
-            invoice.setCreatedDate(LocalDate.now());
-            invoice.setCurrency("USD");
-            invoice.setInvoiceNumber(invoiceNumber);
-            invoiceProducerCh.sendInvoiceCreated(invoice);
+    private void invoicesRabbitConsistentHashB() {
+        for (int i = 1; i <= 100; i++) {
+            invoiceProducerCh.sendInvoiceCreated(simpleInvoice("INV-" + i));
+            invoiceProducerCh.sendInvoicePaid(simplePayment("INV-" + i, "PAY-" + i));
         }
+    }
+
+    private InvoicePaidMessage simplePayment(String invoiceNumber, String paymentNumber) {
+        InvoicePaidMessage invoicePaidMessage = new InvoicePaidMessage();
+        invoicePaidMessage.setInvoiceNumber(invoiceNumber);
+        invoicePaidMessage.setPaidDate(LocalDate.now());
+        invoicePaidMessage.setPaymentNumber(paymentNumber);
+        return invoicePaidMessage;
+    }
+
+    private InvoiceCreatedMessage simpleInvoice(String invoiceNumber) {
+        InvoiceCreatedMessage invoice = new InvoiceCreatedMessage();
+        invoice.setInvoiceNumber(invoiceNumber);
+        invoice.setCreatedDate(LocalDate.now());
+        invoice.setAmount(ThreadLocalRandom.current().nextInt(100));
+        invoice.setCurrency("Rp");
+        return invoice;
+    }
+
+    private void invoicesRabbitConsistentHashA() {
+//        for (int i = 0; i < 25; i++) {
+//            String invoiceNumber = "invoice-" + (i % 6);
+//            InvoiceCreatedMessage invoice = new InvoiceCreatedMessage();
+//            invoice.setAmount(ThreadLocalRandom.current().nextInt(100));
+//            invoice.setCreatedDate(LocalDate.now());
+//            invoice.setCurrency("USD");
+//            invoice.setInvoiceNumber(invoiceNumber);
+//            invoiceProducerCh.sendInvoiceCreated(invoice);
+//        }
     }
 
 
